@@ -9,12 +9,13 @@ int pH = A0;
 int phVal[10];
 int pos = 0;
 int counter;
+int relay = 11;
 int redPin = 6;
 int greenPin = 5;
 int bluePin = 4;
-const float MAX_PH = 0;//FILL THIS IN
-const float MIN_PH = 0;//FILL THIS IN
-const int LOWEST_TEMP = 18;//FILL THIS IN
+const float MAX_PH = 8.0;//FILL THIS IN
+const float MIN_PH = 6.0;//FILL THIS IN
+const int LOWEST_TEMP = 65;//FILL THIS IN
 //OneWire oneWire(7); // Digital Pin 7
 //DallasTemperature dTemp(oneWire);
 OneWire oneWire(2);  
@@ -25,39 +26,36 @@ DallasTemperature sensors(&oneWire);
 void setup()
 {
   Serial.begin(9600);
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
   servo1.attach(13);
   sensors.begin();
   counter =0;
+  pinMode(relay,HIGH);
 }
 
 void loop(){
   //Serial.print(counter);
-  //Serial.print("\n"); 
-  if(counter==10){//86400){
-    counter = 3;
-    servo1.write(50);              
-    delay(1000);
-    servo1.write(90);
-    delay(1000);
-    servo1.write(130);
-    delay(1000);   
-    servo1.write(90);         
+  //Serial.print("\n");
+  if(counter==86400){//86400){
+    //counter = 3;
+    servo1.write(88);              
+    delay(400);
+    servo1.write(94);
+    delay(500);
+    servo1.write(100);
+    delay(400);  
+    servo1.write(94);        
   }
   sensors.requestTemperatures();
   if(sensors.getTempFByIndex(0)<LOWEST_TEMP){
     //turn on light
-    RGB_color(0,0,255);
-    delay(1000);
+    digitalWrite(relay,HIGH);
   }else{
-    RGB_color(0,255,0);
-    delay(1000);
+    //turn off light
+    digitalWrite(relay,LOW);
   }
   Serial.print(sensors.getTempCByIndex(0));
   Serial.print("\n");
-  for(int i=0;i<10;i++){ 
+  for(int i=0;i<10;i++){
     phVal[i]=analogRead(pH);
     delay(100);
   }
@@ -79,14 +77,19 @@ void loop(){
   phValue=3.5*phValue;  
   Serial.print(phValue);
   Serial.print("\n");
-
-// if(phValue>MAX_PH||phValue<MIN_PH){
+  //END OF CODE
+ if(phValue>MAX_PH||phValue<MIN_PH){
+    RGB_color(255,0,0);
+    delay(1000);
     //turn on warning light
- //}else{
+ }else{
+    RGB_color(0,0,0);
+    delay(1000);
     //turn off warning light
- //}
+ }
   //Serial.print(counter);
   counter++;
+  Serial.println(counter);
 }
 
 void RGB_color(int redLightValue, int greenLightValue, int blueLightValue)
